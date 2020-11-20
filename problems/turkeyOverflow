@@ -1,0 +1,386 @@
+/**
+ * PROBLEM SUMMARY
+ *
+ * Thanksgiving is almost here! The holiday pays homage to
+ * peace and gluttony. It is a holiday where one can fill
+ * their plates full of food without feeling guilty.
+ *
+ * This Thanksgiving, you'll be dining at your Aunt Gretel's house.
+ * Your Aunt Gretel learned an important lesson in her youth,
+ * "Be careful how much you eat, for you never know what bad things
+ * may come your way when you're full of food."
+ *
+ * As a responsible adult, Gretel bought smart plates for her family.
+ * The smart plates prevent her and her family from eating too much.
+ * Unfortunately, she forgot to mention this detail to your extended
+ * family, so they're mixed in with normal plates.
+ *
+ * Here's little more information about these smart plates.
+ *  - Plates can hold up to the `MAX_WEIGHT` of 28
+ *  - There are a total of 3 smart plates
+ *  - You can only add 1 item at a time to smart plates
+ *  - Heavier weights cannot go on lighter weights
+ *    i.e. an item with a weight of 10
+ *         CANNOT go on top of
+ *         an item with a weight of 1
+ *         HOWEVER
+ *         an item with a weight of 1
+ *         CAN go on top of
+ *         an item with a weight of 10
+ *  - Smart plates do not have to be clean to use them
+ *
+ * ------------------------------------------------------------
+ *
+ * Problem 1:
+ * There's a major plate problem in the house! There are plates
+ * being used for dinner that have cracks in them and everyone's
+ * meals may be doomed to hit the floor! Luckily, Aunt Gretel has
+ * the smart plates nearby as backup.
+ *
+ * Write a function `turkeyTime`, where the input is a cracked plate full
+ * of food `ogPlate`, that has no restrictions. This function will use
+ * the smart plates, `smartPlates`, as stacks while you move your food
+ * with the given constraints to make sure more plates do not break.
+ * Be sure to dirty a few smart plates as possible.
+ *
+ * Don't forget about the constraints of the smart plates!
+ *  - max weight per plate = 28
+ *  - total smart plates = 3
+ *  - plates don't have to be cleaned to use them
+ *  - only one item can be added to a smart plate at a time
+ *  - lighter items are always on top of heavier items
+ *
+ * If you are able to move your food without issue, log out
+ *    "WINNER WINNER, TURKEY DINNER!"
+ *
+ * If you fail to move your food due to the constraints, log out
+ *    "TURKEY OVERFLOW!".
+ *
+ *  EXAMPLE: The following is a maxed out plate, but
+ *           would be sufficient to hold the items
+ *           without overflowing.
+ *
+ *    ------------ weight 1 -----------
+ *    ------------ weight 2 -----------
+ *    ------------ weight 3 -----------
+ *    ------------ weight 5 -----------
+ *    ------------ weight 7 -----------
+ *    ------------ weight 10 ----------
+ *
+ *    Plate sum = 28
+ *
+ *
+ *  EXAMPLE: The following is an overflowing plate, which
+ *           you would not be able to eat from
+ *
+ *    ------------ weight 1 -----------
+ *    ------------ weight 2 -----------
+ *    ------------ weight 3 -----------
+ *    ------------ weight 3 -----------
+ *    ------------ weight 5 -----------
+ *    ------------ weight 7 -----------
+ *    ------------ weight 10 ----------
+ *
+ *    Plate sum = 31
+ */
+
+const MAX_WEIGHT = 28;
+
+const smartPlates = [
+  { items: [], weight: 0 },
+  { items: [], weight: 0 },
+  { items: [], weight: 0 },
+];
+
+const menu = {
+  /* weight 1 items */
+  cranberry_sauce: 1,
+  salad: 1,
+  whipped_cream: 1,
+  /* weight 2 items */
+  asparagus: 2,
+  brussels_sprouts: 2,
+  dinner_rolls: 2,
+  gravy: 2,
+  pickled_beets: 2,
+  succotash: 2,
+  roasted_carrots: 2,
+  /* weight 3 items */
+  apple_pie: 3,
+  pecan_pie: 3,
+  pumpkin_pie: 3,
+  /* weight 5 items */
+  corn_bread: 5,
+  squash: 5,
+  turkey: 5,
+  /* weight 7 items */
+  mashed_potatoes: 7,
+  candied_yams: 7,
+  green_bean_casserole: 7,
+  /* weight 10 items */
+  stuffing: 10,
+};
+
+// view the top element of the stack
+function peek(plate) {
+  console.log('peek');
+
+  if (plate && plate.items) {
+    const plateItems = plate.items;
+    const pLen = plateItems && plateItems.length;
+
+    let item;
+
+    if (pLen >= 1) {
+      item = plateItems[pLen - 1];
+    }
+
+    return item;
+  }
+};
+
+function getMaxTop(ignoreIndex) {
+  let maxIndex;
+
+  smartPlates.reduce((prev, current, index) => {
+    if (ignoreIndex !== index) {
+      const top = current.items[0];
+      const maxVal = Math.max(top, prev);
+
+      maxIndex = maxVal === top ? index : prev;
+      return maxVal;
+    }
+
+    return prev;
+  }, 0);
+
+  return maxIndex - 1;
+}
+// view the top element of all the stacks
+function getStacksForMoving() {
+  console.log("getStacksForMoving");
+
+  const placementStacks = [];
+
+  let iterator = 0;
+  let ignoreIdx;
+  while (iterator < 2) {
+    const getMaxStackIdx = getMaxTop(ignoreIdx);
+    console.log({ getMaxStackIdx });
+    placementStacks.push(getMaxStackIdx)
+
+    ignoreIdx = getMaxStackIdx;
+    iterator += 1;
+  }
+
+  console.log({ placementStacks });
+
+  return {
+    moveFrom: placementStacks[1],
+    moveTo: placementStacks[0],
+  }
+};
+
+function isFullStack() {
+  console.log("isFullStack");
+
+  let totalEmptyStacks = 0;
+
+  smartPlates.reduce((prev, current) => {
+    if (current.weight === 0) {
+      totalEmptyStacks += 1;
+    }
+  }, 0);
+
+  return totalEmptyStacks >= smartPlates.length - 1;
+};
+
+function isEmpty(plate) {
+  console.log("isEmpty");
+
+  return plate && plate.weight === 0;
+};
+
+// move the item to the smart plate
+function pushItem(plate, item) {
+  console.log('pushItem');
+
+  // add item to smart plate
+  plate.items.push(item);
+  plate.weight += item;
+};
+
+// remove the item from the smart plate
+function popItem(plate) {
+  console.log('popItem');
+
+  // add item to smart plate
+  const item = plate.items.pop();
+  plate.weight -= item;
+
+  return item;
+};
+
+function restack() {
+  console.log("restack");
+
+  const isSingleStack = isFullStack();
+
+  if (!isSingleStack) {
+    const moveStacks = getStacksForMoving();
+
+    console.log("inside restacker ", { moveStacks });
+
+    const fromStack = smartPlates[moveStacks.moveFrom];
+    const itemToPlace = popItem(fromStack);
+
+    console.log("before placeItem in restack", { itemToPlace })
+
+    placeItem(itemToPlace, moveStacks.moveTo);
+
+    console.log("before restack in restack")
+    restack();
+
+  }
+};
+
+// recursive function with the sole responsibility
+// of placing an item on a plate
+function placeItem(currentItem, currentStackIdx = 0) {
+  console.log("placeItem", {currentItem, currentStackIdx});
+
+  if (currentStackIdx > smartPlates.length - 1) {
+    // TODO: write notes about why this is SO
+    throw Error('cannot place item on smart plate');
+  }
+
+  const currentStack = smartPlates[currentStackIdx];
+  const currentStackEmpty = isEmpty(currentStack);
+  const currentStackTop = peek(currentStack);
+  const canPush = currentStack.weight + currentItem <= MAX_WEIGHT;
+
+  if (
+    canPush
+    && (
+      currentStackEmpty
+      || currentItem <= currentStackTop
+    )
+  ) {
+    pushItem(currentStack, currentItem);
+    console.log(JSON.stringify(smartPlates));
+  } else {
+    console.log("before place item in place item");
+    placeItem(currentItem, currentStackIdx + 1)
+  }
+};
+
+function turkeyTime(ogPlate) {
+  console.log("init -- turkey time");
+  console.log({ ogPlate });
+
+  try {
+    while (ogPlate.length > 0) {
+      const ogPlateItem = ogPlate.shift();
+
+      console.log("recurrence", { ogPlateItem });
+
+      placeItem(ogPlateItem);
+
+      console.log("before restack in recurrence");
+      restack();
+    }
+
+    return 'WINNER WINNER, TURKEY DINNER!'
+  } catch (error) {
+    console.error({ error });
+    return 'TURKEY OVERFLOW!';
+  }
+
+  /**
+   * does og plate have anything on it
+   *
+   * is first stack empty
+   *   if yes, place
+   *   if no, peek next stack if empty
+   *     if empty place,
+   *       ** restack check **
+   *          peek all stack (not where you just placed)
+   *            find largest value of all tops
+   *              largest value to top of stack you just placed
+   *          - ORRRRRRR -
+   *          Peek all tops
+  *              find stack to move to
+  *              find stack to move from
+   *          if og plate empty
+   *              then restack
+   *                if value GT placement column top,
+   *                  placement column becomes new place stack
+   *
+   *          if og not empty
+  *                start over with OG plate next item
+   *       **
+   *     if not empty, compare GT/LT
+   *       if og item GT, peek next stack empty (repeat prev. step)
+   *       if og item LT, place
+   */
+};
+
+function test1() {
+  const input = [
+    menu.cranberry_sauce,
+    menu.asparagus,
+    menu.apple_pie,
+    // menu.corn_bread,
+    // menu.mashed_potatoes,
+    // menu.stuffing,
+  ];
+
+  try {
+    console.log('Turkey Time!');
+    console.log('start');
+    console.log('_____________________________');
+
+    const result = turkeyTime(input);
+
+    console.log('_____________________________');
+    console.log('finish');
+
+    console.log({ result });
+    console.log(JSON.stringify(smartPlates));
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function test2() {
+  const input = [
+    menu.cranberry_sauce,
+    menu.whipped_cream,
+    menu.asparagus,
+    menu.apple_pie,
+    menu.pumpkin_pie,
+    menu.corn_bread,
+    menu.mashed_potatoes,
+    menu.stuffing,
+  ];
+
+  try {
+    console.log('Turkey Time!');
+    console.log('start');
+    console.log('_____________________________');
+
+    const result = turkeyTime(input);
+
+
+    console.log('_____________________________');
+    console.log('finish');
+
+    console.log({ result });
+    console.log(JSON.stringify(smartPlates));
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+test1();
+// test2();
